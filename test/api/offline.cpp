@@ -8,6 +8,7 @@
 #include <mbgl/platform/log.hpp>
 #include <mbgl/util/work_request.hpp>
 #include <mbgl/util/io.hpp>
+#include <mbgl/util/run_loop.hpp>
 
 using namespace mbgl;
 using namespace std::literals::chrono_literals;
@@ -29,6 +30,7 @@ const std::string prefix = "http://127.0.0.1:3000";
 auto display = std::make_shared<mbgl::HeadlessDisplay>();
 
 TEST(API, Offline) {
+    util::RunLoop runLoop;
     HeadlessView view(display, 1);
     DefaultFileSource fileSource(":memory:", ".");
 

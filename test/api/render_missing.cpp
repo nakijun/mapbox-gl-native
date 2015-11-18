@@ -7,11 +7,14 @@
 #include <mbgl/storage/default_file_source.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/io.hpp>
+#include <mbgl/util/run_loop.hpp>
 
 #include <future>
 
 TEST(API, RenderMissingTile) {
     using namespace mbgl;
+
+    util::RunLoop loop;
 
     const auto style = util::read_file("test/fixtures/api/water_missing_tiles.json");
 
@@ -32,26 +35,27 @@ TEST(API, RenderMissingTile) {
 
     // This host does not respond (== connection error).
     map.setStyleJSON(style, "");
-    std::promise<void> promise;
-    map.renderStill([&promise, &message](std::exception_ptr err, PremultipliedImage&&) {
+    map.renderStill([&message](std::exception_ptr err, PremultipliedImage&&) {
         ASSERT_TRUE(err.operator bool());
         try {
             std::rethrow_exception(err);
         } catch (const std::exception& ex) {
             message = ex.what();
-#ifdef MBGL_HTTP_NSURL
-            EXPECT_STREQ("Could not connect to the server.", ex.what());
-#elif MBGL_HTTP_CURL
-            const char* prefix = "Couldn't connect to server:";
-            EXPECT_EQ(0, strncmp(prefix, ex.what(), strlen(prefix))) << "Full message is: \""
-                                                                     << ex.what() << "\"";
-#else
-            FAIL();
-#endif
         }
-        promise.set_value();
     });
-    promise.get_future().get();
+
+    while (!message.size()) {
+        loop.runOnce();
+    }
+
+#ifdef MBGL_HTTP_NSURL
+    EXPECT_STREQ("Could not connect to the server.", message.c_str());
+#elif MBGL_HTTP_CURL
+    const char* prefix = "Couldn't connect to server:";
+    EXPECT_EQ(0, strncmp(prefix, message.c_str(), strlen(prefix))) << "Full message is: \"" << message << "\"";
+#else
+    FAIL();
+#endif
 
     auto observer = Log::removeObserver();
     auto flo = dynamic_cast<FixtureLogObserver*>(observer.get());
