@@ -90,8 +90,6 @@ NativeMapView::NativeMapView(JNIEnv *env, jobject obj_, float pixelRatio_, int a
     size_t cacheSize = zoomFactor * cpuFactor * memoryFactor * sizeFactor * 0.5f;
 
     map->setSourceTileCacheSize(cacheSize);
-
-    map->pause();
 }
 
 NativeMapView::~NativeMapView() {
@@ -442,8 +440,6 @@ void NativeMapView::createSurface(ANativeWindow *window_) {
 void NativeMapView::destroySurface() {
     mbgl::Log::Debug(mbgl::Event::Android, "NativeMapView::destroySurface");
 
-    pause();
-
     if (surface != EGL_NO_SURFACE) {
         if (!eglDestroySurface(display, surface)) {
             mbgl::Log::Error(mbgl::Event::OpenGL, "eglDestroySurface() returned error %d",
@@ -658,27 +654,6 @@ EGLConfig NativeMapView::chooseConfig(const EGLConfig configs[], EGLint numConfi
     }
 
     return configId;
-}
-
-void NativeMapView::pause() {
-    mbgl::Log::Debug(mbgl::Event::Android, "NativeMapView::pause");
-
-    if ((display != EGL_NO_DISPLAY) && (context != EGL_NO_CONTEXT)) {
-        map->pause();
-    }
-}
-
-void NativeMapView::resume() {
-    mbgl::Log::Debug(mbgl::Event::Android, "NativeMapView::resume");
-
-    assert(display != EGL_NO_DISPLAY);
-    assert(context != EGL_NO_CONTEXT);
-
-    if (surface != EGL_NO_SURFACE) {
-        map->resume();
-    } else {
-        mbgl::Log::Debug(mbgl::Event::Android, "Not resuming because we are not ready");
-    }
 }
 
 void NativeMapView::notifyMapChange(mbgl::MapChange change) {

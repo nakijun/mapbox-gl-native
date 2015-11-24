@@ -456,27 +456,6 @@ void JNICALL nativeDestroySurface(JNIEnv *env, jobject obj, jlong nativeMapViewP
     nativeMapView->destroySurface();
 }
 
-void JNICALL nativePause(JNIEnv *env, jobject obj, jlong nativeMapViewPtr) {
-    mbgl::Log::Debug(mbgl::Event::JNI, "nativePause");
-    assert(nativeMapViewPtr != 0);
-    NativeMapView *nativeMapView = reinterpret_cast<NativeMapView *>(nativeMapViewPtr);
-    nativeMapView->pause();
-}
-
-jboolean JNICALL nativeIsPaused(JNIEnv *env, jobject obj, jlong nativeMapViewPtr) {
-    mbgl::Log::Debug(mbgl::Event::JNI, "nativeIsPaused");
-    assert(nativeMapViewPtr != 0);
-    NativeMapView *nativeMapView = reinterpret_cast<NativeMapView *>(nativeMapViewPtr);
-    return nativeMapView->getMap().isPaused();
-}
-
-void JNICALL nativeResume(JNIEnv *env, jobject obj, jlong nativeMapViewPtr) {
-    mbgl::Log::Debug(mbgl::Event::JNI, "nativeResume");
-    assert(nativeMapViewPtr != 0);
-    NativeMapView *nativeMapView = reinterpret_cast<NativeMapView *>(nativeMapViewPtr);
-    nativeMapView->resume();
-}
-
 void JNICALL nativeUpdate(JNIEnv *env, jobject obj, jlong nativeMapViewPtr) {
     mbgl::Log::Debug(mbgl::Event::JNI, "nativeUpdate");
     assert(nativeMapViewPtr != 0);
@@ -484,11 +463,11 @@ void JNICALL nativeUpdate(JNIEnv *env, jobject obj, jlong nativeMapViewPtr) {
     nativeMapView->getMap().update(mbgl::Update::Repaint);
 }
 
-void JNICALL nativeRenderSync(JNIEnv *env, jobject obj, jlong nativeMapViewPtr) {
-    mbgl::Log::Debug(mbgl::Event::JNI, "nativeRenderSync");
+void JNICALL nativeRender(JNIEnv *env, jobject obj, jlong nativeMapViewPtr) {
+    mbgl::Log::Debug(mbgl::Event::JNI, "nativeRender");
     assert(nativeMapViewPtr != 0);
     NativeMapView *nativeMapView = reinterpret_cast<NativeMapView *>(nativeMapViewPtr);
-    nativeMapView->getMap().renderSync();
+    nativeMapView->getMap().render();
 }
 
 void JNICALL nativeViewResize(JNIEnv *env, jobject obj, jlong nativeMapViewPtr, jint width, jint height) {
@@ -1966,11 +1945,8 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
         {"nativeCreateSurface", "(JLandroid/view/Surface;)V",
          reinterpret_cast<void *>(&nativeCreateSurface)},
         {"nativeDestroySurface", "(J)V", reinterpret_cast<void *>(&nativeDestroySurface)},
-        {"nativePause", "(J)V", reinterpret_cast<void *>(&nativePause)},
-        {"nativeIsPaused", "(J)Z", reinterpret_cast<void *>(&nativeIsPaused)},
-        {"nativeResume", "(J)V", reinterpret_cast<void *>(&nativeResume)},
         {"nativeUpdate", "(J)V", reinterpret_cast<void *>(&nativeUpdate)},
-        {"nativeRenderSync", "(J)V", reinterpret_cast<void *>(&nativeRenderSync)},
+        {"nativeRender", "(J)V", reinterpret_cast<void *>(&nativeRender)},
         {"nativeViewResize", "(JII)V",
          reinterpret_cast<void *>(static_cast<void JNICALL (
              *)(JNIEnv *, jobject, jlong, jint, jint)>(&nativeViewResize))},
