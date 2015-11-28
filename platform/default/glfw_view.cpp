@@ -22,6 +22,15 @@ GLFWView::GLFWView(bool fullscreen_, bool benchmark_)
     : fullscreen(fullscreen_), benchmark(benchmark_) {
     glfwSetErrorCallback(glfwError);
 
+    // We don't really block on RunLoop::run(), instead, we do
+    // a glfwPostEmptyEvent() every time we get notified, so we
+    // wake the main thread and call RunLoop::runOnce() that
+    // doesn't block and will consume the event queue.
+    loop.setForeignRunLoopIntegrationCallback([this] {
+        process.clear();
+        glfwPostEmptyEvent();
+    });
+
     std::srand(std::time(0));
 
     if (!glfwInit()) {
@@ -398,10 +407,14 @@ void GLFWView::onMouseMove(GLFWwindow *window, double x, double y) {
 void GLFWView::run() {
     while (!glfwWindowShouldClose(window)) {
         glfwWaitEvents();
-        const bool dirty = !clean.test_and_set();
-        if (dirty) {
+
+        if (!process.test_and_set()) {
+            loop.runOnce();
+        }
+
+        if (!render.test_and_set()) {
             const double started = glfwGetTime();
-            map->renderSync();
+            map->render();
             report(1000 * (glfwGetTime() - started));
             if (benchmark) {
                 map->update(mbgl::Update::Repaint);
@@ -435,7 +448,7 @@ void GLFWView::notify() {
 }
 
 void GLFWView::invalidate() {
-    clean.clear();
+    render.clear();
     glfwPostEmptyEvent();
 }
 
