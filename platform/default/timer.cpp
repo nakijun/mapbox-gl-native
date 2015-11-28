@@ -2,6 +2,8 @@
 
 #include <mbgl/util/run_loop.hpp>
 
+#include <cassert>
+
 #include <uv.h>
 
 #if UV_VERSION_MAJOR == 0 && UV_VERSION_MINOR <= 10
@@ -61,6 +63,7 @@ private:
 
 Timer::Timer()
     : impl(std::make_unique<Impl>()) {
+    assert(!RunLoop::Get()->hasForeignRunLoopIntegration());
 }
 
 Timer::~Timer() = default;

@@ -191,6 +191,8 @@ void RunLoop::unref() {
 void RunLoop::addWatch(int fd, Event event, std::function<void(int, Event)>&& callback) {
     MBGL_VERIFY_THREAD(tid);
 
+    assert(!RunLoop::Get()->hasForeignRunLoopIntegration());
+
     Watch *watch = nullptr;
     auto watchPollIter = impl->watchPoll.find(fd);
 

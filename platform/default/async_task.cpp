@@ -19,7 +19,8 @@ namespace util {
 class AsyncTask::Impl {
 public:
     Impl(std::function<void()>&& fn)
-        : async(new uv_async_t),
+        : runLoop(RunLoop::Get()),
+          async(new uv_async_t),
           task(std::move(fn)) {
 
         uv_loop_t* loop = reinterpret_cast<uv_loop_t*>(RunLoop::getLoopHandle());
@@ -38,24 +39,34 @@ public:
     }
 
     void maySend() {
-        // uv_async_send will do the call coalescing for us.
-        if (uv_async_send(async) != 0) {
-            throw std::runtime_error("Failed to async send.");
+        if (!queued.test_and_set()) {
+            if (uv_async_send(async) != 0) {
+                throw std::runtime_error("Failed to async send.");
+            }
+
+            runLoop->notifyPendingEvents();
         }
+    }
+
+    void runTask() {
+        queued.clear();
+        task();
     }
 
 private:
     static void asyncCallback(UV_ASYNC_PARAMS(handle)) {
-        reinterpret_cast<Impl*>(handle->data)->task();
+        reinterpret_cast<Impl*>(handle->data)->runTask();
     }
 
     uv_handle_t* handle() {
         return reinterpret_cast<uv_handle_t*>(async);
     }
 
+    RunLoop* runLoop;
     uv_async_t* async;
 
     std::function<void()> task;
+    std::atomic_flag queued = ATOMIC_FLAG_INIT;
 };
 
 AsyncTask::AsyncTask(std::function<void()>&& fn)
