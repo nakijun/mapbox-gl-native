@@ -784,6 +784,30 @@ public class MapboxMap {
     }
 
     //
+    // Padding
+    //
+
+    /**
+     * Sets the distance from the edges of the map view’s frame to the edges of the map
+     * view’s logical viewport.
+     * <p/>
+     * When the value of this property is equal to {0,0,0,0}, viewport
+     * properties such as `centerCoordinate` assume a viewport that matches the map
+     * view’s frame. Otherwise, those properties are inset, excluding part of the
+     * frame from the viewport. For instance, if the only the top edge is inset, the
+     * map center is effectively shifted downward.
+     *
+     * @param left   The left margin in pixels.
+     * @param top    The top margin in pixels.
+     * @param right  The right margin in pixels.
+     * @param bottom The bottom margin in pixels.
+     */
+    public void setPadding(int left, int top, int right, int bottom) {
+        mMapView.setContentPadding(left, top, right, bottom);
+
+    }
+
+    //
     // Map events
     //
 

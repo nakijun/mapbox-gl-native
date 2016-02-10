@@ -84,6 +84,9 @@
         <activity
             android:name=".ScrollByActivity"
             android:label="@string/activity_scroll_by" />
+        <activity
+            android:name=".MapPaddingActivity"
+            android:label="@string/activity_map_padding" />
 
         <meta-data
             android:name="com.mapbox.AccessToken"
