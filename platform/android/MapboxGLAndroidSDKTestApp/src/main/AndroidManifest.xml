@@ -86,6 +86,7 @@
             android:label="@string/activity_scroll_by" />
         <activity
             android:name=".MapPaddingActivity"
+            android:screenOrientation="portrait"
             android:label="@string/activity_map_padding" />
 
         <meta-data

@@ -139,7 +139,6 @@ public class MapView extends FrameLayout {
     private int mContentPaddingRight;
     private int mContentPaddingBottom;
 
-
     @UiThread
     public MapView(@NonNull Context context) {
         super(context);
@@ -357,9 +356,9 @@ public class MapView extends FrameLayout {
             }
 
             //noinspection ResourceType
-            mMapboxMap.setMyLocationTrackingMode(savedInstanceState.getInt(MapboxConstants.STATE_MY_LOCATION_TRACKING_MODE, MyLocationTracking.TRACKING_NONE));
+            setMyLocationTrackingMode(savedInstanceState.getInt(MapboxConstants.STATE_MY_LOCATION_TRACKING_MODE, MyLocationTracking.TRACKING_NONE));
             //noinspection ResourceType
-            mMapboxMap.setMyBearingTrackingMode(savedInstanceState.getInt(MapboxConstants.STATE_MY_BEARING_TRACKING_MODE, MyBearingTracking.NONE));
+            setMyBearingTrackingMode(savedInstanceState.getInt(MapboxConstants.STATE_MY_BEARING_TRACKING_MODE, MyBearingTracking.NONE));
         }
 
         // Force a check for an access token
@@ -397,8 +396,8 @@ public class MapView extends FrameLayout {
         outState.putString(MapboxConstants.STATE_ACCESS_TOKEN, mMapboxMap.getAccessToken());
         outState.putLong(MapboxConstants.STATE_DEFAULT_TRANSITION_DURATION, mNativeMapView.getDefaultTransitionDuration());
         outState.putBoolean(MapboxConstants.STATE_MY_LOCATION_ENABLED, mMapboxMap.isMyLocationEnabled());
-        outState.putInt(MapboxConstants.STATE_MY_LOCATION_TRACKING_MODE, mMapboxMap.getMyLocationTrackingMode());
-        outState.putInt(MapboxConstants.STATE_MY_BEARING_TRACKING_MODE, mMapboxMap.getMyBearingTrackingMode());
+        outState.putInt(MapboxConstants.STATE_MY_LOCATION_TRACKING_MODE, getMyLocationTrackingMode());
+        outState.putInt(MapboxConstants.STATE_MY_BEARING_TRACKING_MODE, getMyBearingTrackingMode());
 
         // UiSettings
         UiSettings uiSettings = mMapboxMap.getUiSettings();
@@ -632,6 +631,46 @@ public class MapView extends FrameLayout {
     }
 
     //
+    // Content padding
+    //
+
+    /**
+     * Return The current content padding left of the map view viewport.
+     *
+     * @return The current content padding left
+     */
+    int getContentPaddingLeft() {
+        return mContentPaddingLeft;
+    }
+
+    /**
+     * Return The current content padding left of the map view viewport.
+     *
+     * @return The current content padding left
+     */
+    int getContentPaddingTop() {
+        return mContentPaddingTop;
+    }
+
+    /**
+     * Return The current content padding left of the map view viewport.
+     *
+     * @return The current content padding right
+     */
+    int getContentPaddingRight() {
+        return mContentPaddingRight;
+    }
+
+    /**
+     * Return The current content padding left of the map view viewport.
+     *
+     * @return The current content padding bottom
+     */
+    int getContentPaddingBottom() {
+        return mContentPaddingBottom;
+    }
+
+    //
     // Zoom
     //
 
@@ -645,51 +684,6 @@ public class MapView extends FrameLayout {
     double getZoom() {
         return mNativeMapView.getZoom();
     }
-
-//    /**
-//     * Return The current content padding left of the map view viewport.
-//     *
-//     * @return The current content padding left
-//     */
-///*
-//    public int getContentPaddingLeft() {
-//        return mContentPaddingLeft;
-//    }
-//*/
-//
-//    /**
-//     * Return The current content padding left of the map view viewport.
-//     *
-//     * @return The current content padding left
-//     */
-///*
-//    public int getContentPaddingTop() {
-//        return mContentPaddingTop;
-//    }
-//*/
-//
-//    /**
-//     * Return The current content padding left of the map view viewport.
-//     *
-//     * @return The current content padding left
-//     */
-///*
-//    public int getContentPaddingRight() {
-//        return mContentPaddingRight;
-//    }
-//*/
-//
-//    /**
-//     * Return The current content padding left of the map view viewport.
-//     *
-//     * @param zoomLevel The new zoom level.
-//     * @param animated  If true, animates the change. If false, immediately changes the map.
-//     * @see MapboxMap#MAXIMUM_ZOOM
-//     */
-///*
-//    public int getContentPaddingBottom() {
-//        return mContentPaddingBottom;
-//*/
 
     /**
      * <p>
@@ -1492,6 +1486,10 @@ public class MapView extends FrameLayout {
         return mNativeMapView.getScale();
     }
 
+    public void setUserLocationPadding(int left, int top, int right, int bottom) {
+        mUserLocationView.setContentPadding(new int[]{left, top, right, bottom});
+    }
+
     // This class handles TextureView callbacks
     private class SurfaceTextureListener implements TextureView.SurfaceTextureListener {
 
@@ -1799,7 +1797,9 @@ public class MapView extends FrameLayout {
             }
 
             // reset tracking modes if gesture occurs
-            resetTrackingModes();
+            if (mMapboxMap.getTrackingSettings().isDismissTrackingOnGesture()) {
+                resetTrackingModes();
+            }
 
             // Fling the map
             float ease = 0.25f;
@@ -1831,8 +1831,10 @@ public class MapView extends FrameLayout {
                 return false;
             }
 
-            // reset tracking modes if gesture occurs
-            resetTrackingModes();
+            if (mMapboxMap.getTrackingSettings().isDismissTrackingOnGesture()) {
+                // reset tracking modes if gesture occurs
+                resetTrackingModes();
+            }
 
             // Cancel any animation
             mNativeMapView.cancelTransitions();
@@ -1862,8 +1864,10 @@ public class MapView extends FrameLayout {
                 return false;
             }
 
-            // reset tracking modes if gesture occurs
-            resetTrackingModes();
+            if (mMapboxMap.getTrackingSettings().isDismissTrackingOnGesture()) {
+                // reset tracking modes if gesture occurs
+                resetTrackingModes();
+            }
 
             mBeginTime = detector.getEventTime();
             return true;
@@ -1935,8 +1939,10 @@ public class MapView extends FrameLayout {
                 return false;
             }
 
-            // reset tracking modes if gesture occurs
-            resetTrackingModes();
+            if (mMapboxMap.getTrackingSettings().isDismissTrackingOnGesture()) {
+                // reset tracking modes if gesture occurs
+                resetTrackingModes();
+            }
 
             mBeginTime = detector.getEventTime();
             return true;
@@ -2014,8 +2020,10 @@ public class MapView extends FrameLayout {
                 return false;
             }
 
-            // reset tracking modes if gesture occurs
-            resetTrackingModes();
+            if(mMapboxMap.getTrackingSettings().isDismissTrackingOnGesture()) {
+                // reset tracking modes if gesture occurs
+                resetTrackingModes();
+            }
 
             mBeginTime = detector.getEventTime();
             return true;
@@ -2834,6 +2842,10 @@ public class MapView extends FrameLayout {
 
     private void setWidgetMargins(@NonNull final View view, int left, int top, int right, int bottom) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+        left += mContentPaddingLeft;
+        top += mContentPaddingTop;
+        right += mContentPaddingRight;
+        bottom += mContentPaddingBottom;
         layoutParams.setMargins(left, top, right, bottom);
         view.setLayoutParams(layoutParams);
     }

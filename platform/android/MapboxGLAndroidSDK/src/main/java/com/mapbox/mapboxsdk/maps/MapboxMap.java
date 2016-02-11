@@ -40,6 +40,7 @@ public class MapboxMap {
 
     private MapView mMapView;
     private UiSettings mUiSettings;
+    private TrackingSettings mTrackingSettings;
     private Projection mProjection;
     private CameraPosition mCameraPosition;
     private boolean mInvalidCameraPosition;
@@ -68,6 +69,7 @@ public class MapboxMap {
         mMapView = mapView;
         mMapView.addOnMapChangedListener(new MapChangeCameraPositionListener());
         mUiSettings = new UiSettings(mapView);
+        mTrackingSettings = new TrackingSettings(mapView);
         mProjection = new Projection(mapView);
         mSelectedMarkers = new ArrayList<>();
         mInfoWindows = new ArrayList<>();
@@ -84,6 +86,19 @@ public class MapboxMap {
      */
     public UiSettings getUiSettings() {
         return mUiSettings;
+    }
+
+    //
+    // TrackingSettings
+    //
+
+    /**
+     * Gets the tracking interface settings for the map.
+     *
+     * @return
+     */
+    public TrackingSettings getTrackingSettings(){
+        return mTrackingSettings;
     }
 
     //
@@ -804,7 +819,11 @@ public class MapboxMap {
      */
     public void setPadding(int left, int top, int right, int bottom) {
         mMapView.setContentPadding(left, top, right, bottom);
+        mUiSettings.invalidate();
+    }
 
+    public void setUserLocationPadding(int left, int top, int right, int bottom){
+        mMapView.setUserLocationPadding(left, top, right, bottom);
     }
 
     //
@@ -1027,40 +1046,6 @@ public class MapboxMap {
     }
 
     /**
-     * <p>
-     * Set the current my location tracking mode.
-     * </p>
-     * <p>
-     * Will enable my location if not active.
-     * </p>
-     * See {@link MyLocationTracking} for different values.
-     *
-     * @param myLocationTrackingMode The location tracking mode to be used.
-     * @throws SecurityException if no suitable permission is present
-     * @see MyLocationTracking
-     */
-    @UiThread
-    @RequiresPermission(anyOf = {
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION})
-    public void setMyLocationTrackingMode(@MyLocationTracking.Mode int myLocationTrackingMode) {
-        mMapView.setMyLocationTrackingMode(myLocationTrackingMode);
-    }
-
-    /**
-     * Returns the current user location tracking mode.
-     *
-     * @return The current user location tracking mode.
-     * One of the values from {@link MyLocationTracking.Mode}.
-     * @see MyLocationTracking.Mode
-     */
-    @UiThread
-    @MyLocationTracking.Mode
-    public int getMyLocationTrackingMode() {
-        return mMapView.getMyLocationTrackingMode();
-    }
-
-    /**
      * Sets a callback that's invoked when the location tracking mode changes.
      *
      * @param listener The callback that's invoked when the location tracking mode changes.
@@ -1074,42 +1059,6 @@ public class MapboxMap {
     // used by MapView
     MapboxMap.OnMyLocationTrackingModeChangeListener getOnMyLocationTrackingModeChangeListener() {
         return mOnMyLocationTrackingModeChangeListener;
-    }
-
-    /**
-     * <p>
-     * Set the current my bearing tracking mode.
-     * </p>
-     * Shows the direction the user is heading.
-     * <p>
-     * When location tracking is disabled the direction of {@link UserLocationView}  is rotated
-     * When location tracking is enabled the {@link MapView} is rotated based on bearing value.
-     * </p>
-     * See {@link MyBearingTracking} for different values.
-     *
-     * @param myBearingTrackingMode The bearing tracking mode to be used.
-     * @throws SecurityException if no suitable permission is present
-     * @see MyBearingTracking
-     */
-    @UiThread
-    @RequiresPermission(anyOf = {
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION})
-    public void setMyBearingTrackingMode(@MyBearingTracking.Mode int myBearingTrackingMode) {
-        mMapView.setMyBearingTrackingMode(myBearingTrackingMode);
-    }
-
-    /**
-     * Returns the current user bearing tracking mode.
-     * See {@link MyBearingTracking} for possible return values.
-     *
-     * @return the current user bearing tracking mode.
-     * @see MyBearingTracking
-     */
-    @UiThread
-    @MyLocationTracking.Mode
-    public int getMyBearingTrackingMode() {
-        return mMapView.getMyBearingTrackingMode();
     }
 
     /**

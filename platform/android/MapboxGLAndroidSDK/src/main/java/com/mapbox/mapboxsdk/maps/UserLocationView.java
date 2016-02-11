@@ -84,6 +84,7 @@ public final class UserLocationView extends View {
 
     private LatLng mCurrentMapViewCoordinate;
     private double mCurrentBearing;
+    private int[] mContentPadding = new int[4];
 
     private boolean mPaused = false;
     private Location mUserLocation;
@@ -96,6 +97,7 @@ public final class UserLocationView extends View {
 
     @MyBearingTracking.Mode
     private int mMyBearingTrackingMode;
+
 
     // Compass data
     private MyBearingListener mBearingChangeListener;
@@ -305,8 +307,9 @@ public final class UserLocationView extends View {
                     mMapView.getMapboxMap().animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 300, null);
                     mMarkerScreenMatrix.reset();
                     mMarkerScreenMatrix.setTranslate(
-                            getMeasuredWidth() / 2,
-                            getMeasuredHeight() / 2);
+                            ((getMeasuredWidth() + mMapView.getContentPaddingLeft() - mMapView.getContentPaddingRight()) / 2) + mContentPadding[0] - mContentPadding[2],
+                            ((getMeasuredHeight() - mMapView.getContentPaddingBottom() + mMapView.getContentPaddingTop()) / 2) - mContentPadding[3] + mContentPadding[1]
+                    );
 
                     // set values for next check for actual change
                     mCurrentMapViewCoordinate = mMarkerCoordinate;
@@ -418,6 +421,10 @@ public final class UserLocationView extends View {
     @MyBearingTracking.Mode
     public int getMyBearingTrackingMode() {
         return mMyBearingTrackingMode;
+    }
+
+    public void setContentPadding(int[] contentPadding) {
+        mContentPadding = contentPadding;
     }
 
     private class MyBearingListener implements SensorEventListener {
