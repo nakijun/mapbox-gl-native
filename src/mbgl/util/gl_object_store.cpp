@@ -14,9 +14,9 @@ void GLObjectStore::abandonVAO(GLuint vao) {
     abandonedVAOs.emplace_back(vao);
 }
 
-void GLObjectStore::abandonBuffer(GLuint buffer) {
+void GLObjectStore::abandonBuffer(gl::BufferPtr buffer) {
     assert(ThreadContext::currentlyOn(ThreadType::Map));
-    abandonedBuffers.emplace_back(buffer);
+    abandonedBuffers.emplace_back(std::move(buffer));
 }
 
 void GLObjectStore::abandonTexture(GLuint texture) {
@@ -39,11 +39,7 @@ void GLObjectStore::performCleanup() {
         abandonedTextures.clear();
     }
 
-    if (!abandonedBuffers.empty()) {
-        MBGL_CHECK_ERROR(glDeleteBuffers(static_cast<GLsizei>(abandonedBuffers.size()),
-                                         abandonedBuffers.data()));
-        abandonedBuffers.clear();
-    }
+    abandonedBuffers.clear();
 }
 
 } // namespace util

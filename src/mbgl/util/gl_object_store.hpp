@@ -2,6 +2,7 @@
 #define MBGL_MAP_UTIL_GL_OBJECT_STORE
 
 #include <mbgl/gl/gl.hpp>
+#include <mbgl/gl/gl_handle.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
 #include <cstdint>
@@ -16,7 +17,7 @@ public:
 
     // Mark OpenGL objects for deletion
     void abandonVAO(GLuint vao);
-    void abandonBuffer(GLuint buffer);
+    void abandonBuffer(gl::BufferPtr buffer);
     void abandonTexture(GLuint texture);
 
     // Actually remove the objects we marked as abandoned with the above methods.
@@ -25,7 +26,7 @@ public:
 
 private:
     std::vector<GLuint> abandonedVAOs;
-    std::vector<GLuint> abandonedBuffers;
+    std::vector<gl::BufferPtr> abandonedBuffers;
     std::vector<GLuint> abandonedTextures;
 };
 
